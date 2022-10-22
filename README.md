@@ -1,2 +1,5 @@
-# embedded_project
-Project for the KMA course
+# Project for the KMA course (Fall 2022)
+
+Contributors:
+Roman Burakov
+Anna Kirik
