@@ -20,14 +20,14 @@ typedef struct {
   unsigned int buf_count;    // Count of samples in the current buffer
   unsigned int n_samples;    // Total number of samples in each buffer
 } inference_t;
-
+  
 // Declare variables
 static inference_t inference;
 static bool record_ready = false;
 static signed short *sampleBuffer;
 static int print_results = -(EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW);
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(VS1053_RESET, VS1053_CS, VS1053_DCS, VS1053_DREQ, CARDCS);
-const int numOfTracks = 5;
+const int numOfTracks = 2;
 
 
 void setup()
@@ -35,31 +35,25 @@ void setup()
   // Initialize serial communication and inferencing
   Serial.begin(9600);
   run_classifier_init();
-
   // Initialize music player and SD card
   musicPlayer.begin();
   SD.begin(CARDCS);
   musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
   musicPlayer.setVolume(10, 10);
-
   // Start recording audio for inferencing
   microphone_inference_start(EI_CLASSIFIER_SLICE_SIZE);
 }
-
 void loop()
 {
   // Record audio for inferencing
   bool m = microphone_inference_record();
-
   // Set up signal data for inferencing
   signal_t signal;
   signal.total_length = EI_CLASSIFIER_SLICE_SIZE;
   signal.get_data = &microphone_audio_signal_get_data;
   ei_impulse_result_t result = {0};
-
   // Run inferencing on the recorded audio
   run_classifier_continuous(&signal, &result, false);
-
   // If enough slices have been processed, check the results and play a track if necessary
   if (++print_results >= (EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW)) {
     if (result.classification[0].value >= 0.7) {
